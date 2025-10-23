@@ -1,6 +1,6 @@
 import { ControlleCore } from '../shared/core/ControlleCore.js'
 import HealthService from '../services/HealthService.js';
-
+import { healthChecksTotal } from '../shared/logs/PrometheusClient.js';
 /**
  * API health status and statistics
  */
@@ -16,6 +16,10 @@ class HealthController extends ControlleCore {
      */
     status = this.mount(async (_req) => {
         const response = await this.service.apiStatus();
+
+        healthChecksTotal.inc({
+            environment: process.env.ENVIRONMENT
+        });
 
         return {
             payload: response,

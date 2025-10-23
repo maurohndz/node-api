@@ -1,23 +1,24 @@
 {
   "name": "Express.js API Dev Container",
-
   "build": {
     "dockerfile": "../Dockerfile",
-    "context": "."
+    "context": ".."
   },
-
+  "workspaceFolder": "/usr/src/app",
+  "mounts": [
+    "source=./,target=/usr/src/app,type=bind,consistency=cached"
+  ],
   "forwardPorts": [7001],
-
   "postCreateCommand": "npm install",
-
   "appPort": [7001],
-
   "overrideCommand": false,
-
   "containerEnv": {
     "NODE_ENV": "development"
   },
-
+  "runArgs": [
+    "--name=node-api",
+    "--network=node-api_network"
+  ],
   "customizations": {
     "vscode": {
       "settings": {
