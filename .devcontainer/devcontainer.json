@@ -16,8 +16,8 @@
     "NODE_ENV": "development"
   },
   "runArgs": [
-    "--name=node-api",
-    "--network=node-api_network"
+    "--name=node-api-app",
+    "--network=monitoring-network"
   ],
   "customizations": {
     "vscode": {
