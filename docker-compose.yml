@@ -1,0 +1,21 @@
+version: '3'
+services:
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - "./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - prometheus:/prometheus
+    networks:
+      - network
+    ports:
+      - 7901:9090
+
+volumes:
+  prometheus:
+    driver: local
+
+networks:
+  network:
+    driver: bridge

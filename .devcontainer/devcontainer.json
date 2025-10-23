@@ -1,0 +1,32 @@
+{
+  "name": "Express.js API Dev Container",
+
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "."
+  },
+
+  "forwardPorts": [7001],
+
+  "postCreateCommand": "npm install",
+
+  "appPort": [7001],
+
+  "overrideCommand": false,
+
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
