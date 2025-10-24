@@ -18,10 +18,13 @@ services:
       - "7902:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
     networks:
       - monitoring-network
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=Abc123456*
+      - GF_INSTALL_PLUGINS=grafana-github-datasource
+      - GITHUB_ACCESS_TOKEN=
 
 volumes:
   prometheus:
