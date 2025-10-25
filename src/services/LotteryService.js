@@ -25,7 +25,6 @@ class LotteryService {
 
         if (!user) throw new ErrorCore('not_found', {
             level: 'warn',
-            message: 'not_found',
             own: data.email,
             service: 'LotteryService',
             endpoint: '/lottery'
@@ -37,8 +36,7 @@ class LotteryService {
 
         if (Math.random() < 0.25) throw new ErrorCore('server', {
             level: 'error',
-            message: 'server',
-            own: data.email,
+            own: user.id,
             service: 'LotteryService',
             endpoint: '/lottery',
         });

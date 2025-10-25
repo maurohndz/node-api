@@ -14,10 +14,6 @@ export class ControlleCore {
 			// Send response
 			return res.status(response.code).send(response);
 		} catch (error) {
-			if (error.ownParams) {
-				console[error.ownParams.level](JSON.stringify(error.ownParams));
-			}
-
 			const response = ControlleCore.build(error);
 
 			res.status(response.code || 500).send(response);

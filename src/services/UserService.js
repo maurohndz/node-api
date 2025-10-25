@@ -9,7 +9,12 @@ class UserService {
     async create(transaction, data) {
         const exist = await this.repository.findOne({ where: { email: data.email } });
 
-        if (exist) throw new ErrorCore('data_exist');
+        if (exist) throw new ErrorCore('data_exist', {
+            level: 'warn',
+            own: data.email,
+            service: 'UserService',
+            endpoint: '/user'
+        });
 
         const user = await this.repository.create({
             payload: {

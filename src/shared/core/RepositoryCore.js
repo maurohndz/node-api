@@ -1,10 +1,8 @@
 import { ErrorCore } from './ErrorCore.js';
 
 export class RepositoryCore {
-    constructor(model, { looger } = {}) {
+    constructor(model) {
         this.model = model;
-
-        if (looger) this.looger = looger;
     }
 
     /**
@@ -22,9 +20,12 @@ export class RepositoryCore {
             ...(attributes && { attributes }),
             ...(include && { include })
         }).catch((error) => {
-            if (this.looger) this.looger.error(`[DATABASE] ${error}`);
-
-            throw new ErrorCore('server');
+            throw new ErrorCore('server', {
+                level: 'error',
+                table: error.original.table,
+                type: error.name,
+                error_message: error.original.message
+            });
         });
     }
 
@@ -42,9 +43,12 @@ export class RepositoryCore {
             ...(attributes && { attributes }),
             ...(include && { include })
         }).catch((error) => {
-            if (this.looger) this.looger.error(`[DATABASE] ${error}`);
-
-            throw new ErrorCore('server');
+            throw new ErrorCore('server', {
+                level: 'error',
+                table: error.original.table,
+                type: error.name,
+                error_message: error.original.message
+            });
         });
     }
 
@@ -65,9 +69,12 @@ export class RepositoryCore {
             transaction,
             ...(fields && { fields })
         }).catch((error) => {
-            if (this.looger) this.looger.error(`[DATABASE] ${error}`);
-
-            throw new ErrorCore('server');
+            throw new ErrorCore('server', {
+                level: 'error',
+                table: error.original.table,
+                type: error.name,
+                error_message: error.original.message
+            });
         });
     }
 
@@ -91,9 +98,12 @@ export class RepositoryCore {
             where,
             returning: true
         }).catch((error) => {
-            if (this.looger) this.looger.error(`[DATABASE] ${error}`);
-
-            throw new ErrorCore('server');
+            throw new ErrorCore('server', {
+                level: 'error',
+                table: error.original.table,
+                type: error.name,
+                error_message: error.original.message
+            });
         });
 
     }
@@ -111,9 +121,12 @@ export class RepositoryCore {
             where,
             returning: true
         }).catch((error) => {
-            if (this.looger) this.looger.error(`[DATABASE] ${error}`);
-
-            throw new ErrorCore('server');
+            throw new ErrorCore('server', {
+                level: 'error',
+                table: error.original.table,
+                type: error.name,
+                error_message: error.original.message
+            });
         });
     }
 }
