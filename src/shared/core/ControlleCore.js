@@ -14,6 +14,7 @@ export class ControlleCore {
 			// Send response
 			return res.status(response.code).send(response);
 		} catch (error) {
+			console.log(error);
 			const response = ControlleCore.build(error);
 
 			res.status(response.code || 500).send(response);

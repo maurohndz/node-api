@@ -8,9 +8,9 @@
   "mounts": [
     "source=./,target=/usr/src/app,type=bind,consistency=cached"
   ],
-  "forwardPorts": [8001],
+  "forwardPorts": [7001],
   "postCreateCommand": "npm install",
-  "appPort": [8001],
+  "appPort": [7001],
   "overrideCommand": false,
   "containerEnv": {
     "NODE_ENV": "development"

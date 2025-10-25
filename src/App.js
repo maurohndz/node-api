@@ -10,6 +10,7 @@ import { mountRouter } from './router/index.js';
 const app = express();
 
 // Security middleware
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes

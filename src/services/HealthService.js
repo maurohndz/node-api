@@ -4,7 +4,7 @@ class HealthService {
      */
     async apiStatus() {
         return {
-            message: 'API Run 2525',
+            message: 'API Run',
             mode: process.env.ENVIRONMENT
         }
     }
