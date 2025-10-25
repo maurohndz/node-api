@@ -54,6 +54,33 @@ services:
       - GF_INSTALL_PLUGINS=grafana-github-datasource
       - GITHUB_ACCESS_TOKEN=
 
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    ports:
+      - 7903:3100
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/config.yml
+      - loki-data:/loki
+    networks:
+      - monitoring-network
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+      # Mapeamos la carpeta de logs del HOST a la carpeta que Promtail espera
+      - ./server/logs:/var/log/nginx-host-logs:ro
+      # Volumen para guardar la posición de lectura (evita duplicados)
+      - ./monitoring/positions:/tmp 
+    networks:
+      - monitoring-network
+    depends_on:
+      - loki
+
 volumes:
   node-postgresql-data:
     driver: local
@@ -62,6 +89,9 @@ volumes:
     driver: local
 
   grafana-data:
+    driver: local
+
+  loki-data:
     driver: local
 
 networks:
