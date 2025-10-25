@@ -1,15 +1,35 @@
-/**
- * Template base for construction controllers
- */
-export class ControlleCore {
-  mount = (controller) => async (req, res) => {
-    try {
-        const data = await controller(req);
+import { success, errors } from "../constants/http.js";
 
-        // Send response
-        return res.status(200).send(data);
-    } catch (error) {
-        res.status(500).send({});
-    }
-  };
+export class ControlleCore {
+	mount = (controller) => async (req, res) => {
+		try {
+			const { payload, message, ...pagination } = await controller(req);
+
+			const response = ControlleCore.build({
+				ownPayload: success[message ?? "ok"],
+				payload,
+				...pagination,
+			});
+
+			// Send response
+			return res.status(response.code).send(response);
+		} catch (error) {
+			const response = ControlleCore.build(error);
+
+			res.status(response.code || 500).send(response);
+		}
+	};
+
+	/**
+	 * Constructs an HTTP response object.
+	 */
+	static build(response) {
+		const ownPayload = response?.ownPayload ?? errors.server;
+
+		return {
+			code: ownPayload.code,
+			data: response.payload || null,
+			message: ownPayload.message,
+		};
+	}
 }

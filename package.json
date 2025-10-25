@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:local": "dotenv -v ENVIRONMENT=local -- nodemon -L src/index.js",
-    "start:dev": "dotenv -v ENVIRONMENT=dev -- nodemon -L src/index.js"
+    "start:dev": "dotenv -v ENVIRONMENT=dev -- nodemon -L src/index.js",
+    "db:pull": "dotenv -v ENVIRONMENT=dev -- node plugins/sequelize_auto.js"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,14 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
-    "prom-client": "^15.1.3"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "prom-client": "^15.1.3",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "sequelize-auto": "^0.8.8"
   }
 }

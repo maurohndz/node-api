@@ -1,4 +1,18 @@
 services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:17
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres
+    ports:
+      - 7801:5432
+    volumes:
+      - node-postgresql-data:/var/lib/postgresql/data
+    networks:
+      - monitoring-network
+      - dev_network
 
   prometheus:
     container_name: prometheus
@@ -27,6 +41,9 @@ services:
       - GITHUB_ACCESS_TOKEN=
 
 volumes:
+  node-postgresql-data:
+    driver: local
+
   prometheus:
     driver: local
 
@@ -35,4 +52,7 @@ volumes:
 
 networks:
   monitoring-network:
+    external: true
+
+  dev_network:
     external: true
