@@ -1,41 +1,112 @@
+# --- Configuración General de Loki ---
+
+# Desactiva la necesidad de un usuario/contraseña para acceder a Loki.
+# ¡Cuidado! No exponer a internet. Útil para redes internas o Docker.
 auth_enabled: false
 
 server:
+  # El puerto en el que Loki recibirá logs (de Promtail) y peticiones (de Grafana).
   http_listen_port: 3100
 
+# --- Configuración del "Ingester" ---
+# El 'Ingester' es el componente que recibe los logs recientes y los guarda en memoria
+# antes de escribirlos en el almacenamiento permanente.
 ingester:
+  
+  # Configuración del "Write-Ahead Log" (Registro de escritura anticipada).
+  # Guarda una copia de los logs entrantes en el disco RÁPIDAMENTE.
+  # Esto evita perder logs si Loki se reinicia o bloquea inesperadamente.
   wal:
-    dir: /loki/wal
+    dir: /loki/wal # Directorio para guardar los archivos WAL.
 
+  # Configuración del "Lifecycler" (Ciclo de vida).
+  # Gestiona cómo el ingester se registra y se da de baja, útil para clústers.
   lifecycler:
-    address: 127.0.0.1
+    address: 127.0.0.1 # La dirección IP que este nodo de Loki usa para identificarse.
+    
+    # Configuración del "Anillo" (Ring) de coordinación.
     ring:
       kvstore:
-        store: inmemory
+        # ¡IMPORTANTE! 'inmemory' significa que Loki NO usará un clúster.
+        # Se ejecuta como un único nodo y gestiona todo en su propia memoria.
+        store: inmemory 
+      
+      # Cuántas copias de cada log guardar. '1' significa que no hay réplicas.
+      # Confirma que es un modo de nodo único (no alta disponibilidad).
       replication_factor: 1
+    
+    # Cuánto tiempo esperar antes de apagar (0 segundos).
     final_sleep: 0s
+  
+  # Cuánto tiempo (1 min) esperar a que un flujo de logs esté inactivo antes de "sellar"
+  # el bloque (chunk) y prepararlo para enviarlo al almacenamiento.
   chunk_idle_period: 1m
-  chunk_target_size: 1048576
+  
+  # El tamaño objetivo para cada bloque de logs (1MB).
+  # Loki intentará crear bloques de este tamaño.
+  chunk_target_size: 1048576 
+  
+  # Cuánto tiempo (1 min) mantener un bloque "sellado" en memoria antes de
+  # escribirlo forzosamente en el almacenamiento a largo plazo.
   chunk_retain_period: 1m
 
+# --- Configuración del Esquema de Almacenamiento ---
+# Define CÓMO se guardan los datos (el índice y los logs).
 schema_config:
   configs:
-    - from: 2024-01-01
+    # Esta configuración se aplica a todos los logs desde esta fecha.
+    - from: 2024-01-01 
+      
+      # ¡EXCELENTE! Usa 'tsdb' (Time Series Database) para el ÍNDICE.
+      # Es el motor moderno de Prometheus, muy rápido y eficiente.
       store: tsdb
+      
+      # Dónde guardar los DATOS de log (los "chunks"). 'filesystem' = disco local.
       object_store: filesystem
+      
+      # La versión del esquema. 'v13' es la que corresponde a 'tsdb'.
       schema: v13
+      
+      # Configuración del índice (las etiquetas).
       index:
+        # Un prefijo para los nombres de los archivos de índice.
         prefix: index_
+        # Crear un nuevo archivo de índice cada 24 horas.
         period: 24h
 
+# --- Configuración del Almacenamiento Físico ---
+# Define DÓNDE se guardan los datos.
 storage_config:
+  
+  # Configuración del almacenamiento en disco local.
   filesystem:
+    # El directorio principal donde se guardarán los DATOS (chunks) de logs.
     directory: /loki/chunks
   
+  # Configuración del "TSDB Shipper" (el que maneja el índice TSDB).
   tsdb_shipper:
+    # Dónde se guardan los archivos de ÍNDICE más recientes (activos).
     active_index_directory: /loki/tsdb-index
+    
+    # Dónde guardar una caché del índice para acelerar las consultas.
     cache_location: /loki/tsdb-cache
+    
+    # Cuánto tiempo (24h) se mantiene la caché antes de refrescarla.
     cache_ttl: 24h
 
+# --- Configuración del "Compactor" ---
+# El 'Compactor' es un proceso de fondo que optimiza el almacenamiento.
+# Fusiona archivos de índice pequeños en otros más grandes para que las
+# consultas antiguas sean más rápidas. Es NECESARIO para 'tsdb'.
 compactor:
+  # Un directorio temporal que usa el compactor para hacer su trabajo.
   working_directory: /loki/compactor
+
+# --- (SECCIÓN RECOMENDADA) Límites y Retención ---
+# Esta sección no estaba en tu archivo, pero es importante.
+# Loki usará los valores por defecto si no se especifica.
+limits_config:
+  # (Este es el valor por defecto: 30 días)
+  # Cuánto tiempo se guardan los logs antes de ser eliminados automáticamente.
+  # Puedes cambiar "720h" (30 días) por "2160h" (90 días), por ejemplo.
+  retention_period: 720h

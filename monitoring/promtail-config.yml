@@ -3,17 +3,35 @@ server:
   grpc_listen_port: 0
 
 positions:
-  filename: /tmp/positions.yaml # Archivo para guardar la posición de lectura
+  filename: /tmp/positions.yaml
 
-client:
-  # URL del servicio Loki (usa el nombre del contenedor)
-  url: http://loki:3100/loki/api/v1/push
+clients:
+  - url: http://loki:3100/loki/api/v1/push # Sigue apuntando a tu Loki
 
 scrape_configs:
-- job_name: nginx
-  static_configs:
-  - targets:
-      - localhost
-    labels:
-      job: nginx-proxy # Etiqueta para tus logs de nginx
-      __path__: /var/log/nginx-host-logs/*.log # Ruta DENTRO de Promtail
+- job_name: containers # Un solo job para todos los contenedores
+  docker_sd_configs:
+    - host: unix:///var/run/docker.sock # Le decimos que hable con el socket de Docker
+      refresh_interval: 5s
+      filters:
+        # Filtro: Solo recolecta logs de contenedores que tengan esta etiqueta
+        - name: label
+          values: ["logging=promtail"]
+  relabel_configs:
+    # Toma la etiqueta "job" que definamos en el contenedor y la usa
+    - source_labels: ['__meta_docker_container_label_job']
+      target_label: 'job'
+    # Crea una etiqueta "container" con el nombre del contenedor
+    - source_labels: ['__meta_docker_container_name']
+      regex: '/(.*)' # Limpia el nombre
+      target_label: 'container'
+
+  pipeline_stages:
+    # Etapa 1: Aplicar estas reglas SÓLO a los logs con la etiqueta job="node_api_app"
+    - match:
+        selector: '{job="node_api_app"}'
+        stages:
+          - drop:
+              # Esta regex busca cualquier línea que contenga el texto "Executing ("
+              # Esto capturará "Executing (default):" y "Executing (UUID):"
+              expression: '.*Executing \('

@@ -17,7 +17,9 @@
   },
   "runArgs": [
     "--name=node-api-app",
-    "--network=monitoring-network"
+    "--network=monitoring-network",
+    "--label=logging=promtail",
+    "--label=job=node_api_app"
   ],
   "customizations": {
     "vscode": {

@@ -27,6 +27,9 @@ services:
     networks:
       - monitoring-network
       - dev_network
+    labels:
+      - "logging=promtail"
+      - "job=nginx"
 
   prometheus:
     container_name: prometheus
@@ -46,7 +49,6 @@ services:
       - "7902:3000"
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./provisioning:/etc/grafana/provisioning
     networks:
       - monitoring-network
     environment:
@@ -71,11 +73,14 @@ services:
     image: grafana/promtail:latest
     command: -config.file=/etc/promtail/config.yml
     volumes:
+      # Archivo de configuración
       - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
-      # Mapeamos la carpeta de logs del HOST a la carpeta que Promtail espera
-      - ./server/logs:/var/log/nginx-host-logs:ro
-      # Volumen para guardar la posición de lectura (evita duplicados)
-      - ./monitoring/positions:/tmp 
+      # Volumen para el socket de Docker (para descubrir contenedores)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Volumen para leer los logs de los contenedores (json-file por defecto)
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # Volumen para guardar la posición de lectura
+      - ./monitoring/positions:/tmp
     networks:
       - monitoring-network
     depends_on:
