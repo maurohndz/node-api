@@ -13,6 +13,9 @@ services:
     networks:
       - monitoring-network
       - dev_network
+    labels:
+      - "logging=promtail"
+      - "job=postgresql"
 
   nginx:
     image: nginx:latest
@@ -85,6 +88,19 @@ services:
       - monitoring-network
     depends_on:
       - loki
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres_exporter:exporter_pass@postgresql:5432/postgres?sslmode=disable"
+    ports:
+      - 7910:9187                 # expone /metrics en :9187
+    networks:
+      - monitoring-network
+    depends_on:
+      - postgresql
+    restart: unless-stopped
 
 volumes:
   node-postgresql-data:

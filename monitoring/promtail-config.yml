@@ -27,7 +27,6 @@ scrape_configs:
       target_label: 'container'
 
   pipeline_stages:
-    # Etapa 1: Aplicar estas reglas SÓLO a los logs con la etiqueta job="node_api_app"
     - match:
         selector: '{job="node_api_app"}'
         stages:
@@ -35,3 +34,10 @@ scrape_configs:
               # Esta regex busca cualquier línea que contenga el texto "Executing ("
               # Esto capturará "Executing (default):" y "Executing (UUID):"
               expression: '.*Executing \('
+
+    - match:
+        selector: '{job="postgresql"}'
+        stages:
+          - multiline:
+              firstline: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}'
+              max_wait_time: 3s
